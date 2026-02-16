@@ -11,6 +11,8 @@
 void init_creatElement(danmaku::baseWindow &mainWND);
 
 ULONG_PTR g_gpToken{};
+// 全局 overlayWindow 指针，用于在按钮点击时添加弹幕
+danmaku::overlayWindow* g_overlayWindow = nullptr;
 
 int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance,
                     [[maybe_unused]] PWSTR pCmdLine, [[maybe_unused]] int nCmdShow)
@@ -19,7 +21,7 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
     INITCOMMONCONTROLSEX iccex;
     iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     iccex.dwICC = ICC_STANDARD_CLASSES; // 包含按钮在内的标准控件
-    // 如果你还需要更高级的控件（如列表视图、树形视图），可以用 ICC_WIN95_CLASSES
+    // 如果还需要更高级的控件（如列表视图、树形视图），可以用 ICC_WIN95_CLASSES
     // iccex.dwICC = ICC_WIN95_CLASSES;
     if (!InitCommonControlsEx(&iccex))
     {
@@ -43,6 +45,9 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
     {
         danmaku::mainWindow mainWindowObj;
         mainWindowObj.create(L"桌面弹幕", 500, 300).show();
+
+        // 获取overlayWindow实例的指针
+        g_overlayWindow = &mainWindowObj.getOverlay();
 
         // 初始化元素
         init_creatElement(mainWindowObj);
@@ -140,7 +145,11 @@ void buttonClickHandler()
     }
 
     // 弹幕发送逻辑
-    MessageBox(NULL, (L"发送弹幕: " + content).c_str(), L"信息", MB_OK);
+    if (g_overlayWindow)
+    {
+        // 添加新弹幕
+        g_overlayWindow->addDanmaku(content, 20, 0xff'66ccff, 0xff'ffcc66);
+    }
 
     // 发送后清空输入框
     SetDlgItemText(g_elemEditContent->getParentHwnd(), g_elemEditContent->getID(), L"");

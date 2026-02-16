@@ -29,6 +29,8 @@ namespace danmaku
         mainWindow &create(std::wstring title, int width, int height);
         // 显示窗口
         mainWindow &show();
+        // 获取overlayWindow实例的引用
+        overlayWindow &getOverlay() { return overlay; }
     };
 }
 

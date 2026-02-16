@@ -54,7 +54,7 @@ namespace danmaku
             MessageBox(nullptr, L"（0002）主窗口：创建窗口失败", L"出错了欸", MB_ICONERROR | MB_OK);
         }
 
-        overlay.create();
+        overlay.create().show();
 
         return *this;
     }

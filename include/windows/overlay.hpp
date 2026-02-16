@@ -39,6 +39,13 @@ namespace danmaku
         }
 
         void paint();
+
+        // 添加弹幕的方法
+        void addDanmaku(const std::wstring &text, float emSize, Gdiplus::ARGB fillColor, Gdiplus::ARGB borderColor)
+        {
+            danmaku_.emplace_back(text, emSize, fillColor, borderColor);
+            paint(); // 重新绘制以显示新弹幕
+        }
     };
 }
 

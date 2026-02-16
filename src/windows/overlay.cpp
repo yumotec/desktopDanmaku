@@ -100,11 +100,11 @@ namespace danmaku
         {
         case WM_CREATE:
             layoutFullscreen();
-            // TODO 测试用
-            danmaku_.emplace_back(L"测试文本 1", 70, 0xff'66ccff, 0xff'ffcc66);
-            danmaku_.emplace_back(L"测试文本 2", 70, 0xff'ff0000, 0xff'0000ff);
-            danmaku_.emplace_back(L"测试文本 3", 70, 0xff'00ff00, 0xff'0000ff);
-            danmaku_.emplace_back(L"测试文本 4", 70, 0xff'0000ff, 0xff'00ffff);
+            // // TODO 测试用
+            // danmaku_.emplace_back(L"测试文本 1", 70, 0xff'66ccff, 0xff'ffcc66);
+            // danmaku_.emplace_back(L"测试文本 2", 70, 0xff'ff0000, 0xff'0000ff);
+            // danmaku_.emplace_back(L"测试文本 3", 70, 0xff'00ff00, 0xff'0000ff);
+            // danmaku_.emplace_back(L"测试文本 4", 70, 0xff'0000ff, 0xff'00ffff);
 
             break;
         case WM_SIZE:

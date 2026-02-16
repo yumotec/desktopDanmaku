@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
         "danmaku",
+        "DMKITEM",
+        "Gdip",
         "GWLP_USERDATA",
         "HFONT",
         "iccex",
@@ -11,6 +13,7 @@
         "lpszMenuName",
         "mainfest",
         "PCWSTR",
+        "PixelFormat32bppPARGB",
         "WM_NCCREATE"
     ],
     "files.associations": {
