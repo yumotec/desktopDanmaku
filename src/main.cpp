@@ -4,9 +4,12 @@
 
 #include <windows.h>
 #include <commctrl.h>
-#include "main.hpp"
 #include <optional>
+<<<<<<< master
 #include <gdiplus.h>
+=======
+#include "main.hpp"
+>>>>>>> master
 
 void init_creatElement(danmaku::baseWindow &mainWND);
 
@@ -59,12 +62,19 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
     return static_cast<int>(msg.wParam);
 }
 
+// 向前声明
+void buttonClickHandler();
+
 // 默认字体对象，微软雅黑字体，大小为24
 danmaku::font defaultFont(L"微软雅黑", 24);
 danmaku::labelExtraInfo lei{
     RGB(0, 0, 0),      // 黑色文本
     RGB(255, 255, 255) // 白色背景
 };
+danmaku::buttonExtraInfo bei{
+    buttonClickHandler,
+    nullptr,
+    nullptr};
 
 // 全局 optional 变量
 std::optional<danmaku::element> g_elemLabelAppName;
@@ -78,7 +88,7 @@ void init_creatElement(danmaku::baseWindow &mainWND)
     g_elemLabelAppName.emplace(
         mainWND.getHandle(),
         danmaku::elementType::label,
-        danmaku::rect{0, 0, 500, 25},
+        danmaku::rect{0, 5, 500, 25},
         L"桌面弹幕 - Desktop Danmaku",
         defaultFont,
         &lei);
@@ -110,7 +120,7 @@ void init_creatElement(danmaku::baseWindow &mainWND)
         danmaku::rect{370, 40, 100, 28},
         L"发送弹幕",
         defaultFont,
-        nullptr);
+        &bei);
 
     // 创建元素（通过 .value() 获取引用）
     danmaku::createElements(
@@ -118,4 +128,23 @@ void init_creatElement(danmaku::baseWindow &mainWND)
         g_elemLabelPrompt.value(),
         g_elemEditContent.value(),
         g_elemButton.value());
+}
+
+void buttonClickHandler()
+{
+    // 获取输入框内容
+    wchar_t szBuffer[256]{};
+    GetDlgItemText(g_elemEditContent->getParentHwnd(), g_elemEditContent->getID(), szBuffer, 256);
+    std::wstring content = szBuffer;
+    if (content.empty())
+    {
+        MessageBox(NULL, L"请输入弹幕内容！", L"提示", MB_OK);
+        return;
+    }
+
+    // 弹幕发送逻辑
+    MessageBox(NULL, (L"发送弹幕: " + content).c_str(), L"信息", MB_OK);
+
+    // 发送后清空输入框
+    SetDlgItemText(g_elemEditContent->getParentHwnd(), g_elemEditContent->getID(), L"");
 }

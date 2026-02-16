@@ -68,9 +68,35 @@ namespace danmaku
                 }
             }
         }
+        case WM_COMMAND:
+        {
+            debug::logOutput(L"元素收到WM_COMMAND消息，ID：", LOWORD(wParam), L"，事件类型：", HIWORD(wParam), L"\n");
+            // int wmId = LOWORD(wParam);
+            int wmEvent = HIWORD(wParam);
+
+            // 按钮被点击
+            if (wmEvent == BN_CLICKED)
+            {
+                debug::logOutput(L"元素处理按钮点击事件，ID：", LOWORD(wParam), L"\n");
+                // 对于按钮元素，调用对应的事件处理函数
+                if (type == elementType::button)
+                {
+                    // 当且仅当按钮对象拥有扩展信息时尝试调用事件处理
+                    if (extra != nullptr)
+                    {
+                        // 调用事件处理（如果有）
+                        auto *btnInfo = reinterpret_cast<buttonExtraInfo *>(extra);
+                        if (btnInfo->clickProc)
+                            btnInfo->clickProc();
+                    }
+                }
+            }
+            break;
+        }
         default:
             return S_FALSE;
         }
+        return S_OK;
     }
 
     element &element::resetFont(HFONT font)

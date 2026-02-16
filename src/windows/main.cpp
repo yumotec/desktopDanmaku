@@ -67,13 +67,11 @@ namespace danmaku
         return *this;
     }
 
-    inline HRESULT transferToElement(UINT uMsg, WPARAM wParam, LPARAM lParam)
+    inline HRESULT transferToElement(UINT_PTR id, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         try
         {
-            HWND hWndCtrl = (HWND)lParam;
-            UINT_PTR nCtrlID = GetDlgCtrlID(hWndCtrl);
-            return searchID(nCtrlID).procMessage(uMsg, wParam, lParam);
+            return searchID(id).procMessage(uMsg, wParam, lParam);
         }
         catch (const std::exception &e)
         {
@@ -90,7 +88,24 @@ namespace danmaku
             PostQuitMessage(0);
             return 0;
         case WM_CTLCOLORSTATIC:
-            return transferToElement(uMsg, wParam, lParam);
+        {
+            HWND hWndCtrl = (HWND)lParam;
+            UINT_PTR nCtrlID = GetDlgCtrlID(hWndCtrl);
+            return transferToElement(nCtrlID, uMsg, wParam, lParam);
+        }
+        case WM_COMMAND:
+        {
+            int wmEvent = HIWORD(wParam);
+            debug::logOutput(L"WM_COMMAND事件，ID：", LOWORD(wParam), L"，事件类型：", wmEvent, L"\n");
+            // 按钮被点击
+            if (wmEvent == BN_CLICKED)
+            {
+                debug::logOutput(L"按钮点击事件，ID：", LOWORD(wParam), L"\n");
+                int wmId = LOWORD(wParam);
+                return transferToElement(wmId, uMsg, wParam, lParam);
+            }
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        }
 
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);

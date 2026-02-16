@@ -77,6 +77,8 @@ namespace danmaku
             other.elementFont = nullptr;
         }
 
+        HWND getParentHwnd() const { return parentHwnd; }
+        HWND getHwnd() const { return hwnd; }
         element &resetFont(HFONT font);
         HRESULT procMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
         template <typename... Args>
