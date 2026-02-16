@@ -5,11 +5,8 @@
 #include <windows.h>
 #include <commctrl.h>
 #include <optional>
-<<<<<<< master
 #include <gdiplus.h>
-=======
 #include "main.hpp"
->>>>>>> master
 
 void init_creatElement(danmaku::baseWindow &mainWND);
 
@@ -55,7 +52,7 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-    }// GDI+关闭前析构
+    } // GDI+关闭前析构
 
     Gdiplus::GdiplusShutdown(g_gpToken);
 
