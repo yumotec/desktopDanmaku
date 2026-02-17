@@ -38,11 +38,12 @@ namespace danmaku
             Gdiplus::FontStyleRegular,
             emSize_,
             &InfRect,
-            strFmt);
+            strFmt
+        );
 
         // 创建画笔（用于绘制边框）和画刷（用于填充文本）
         Gdiplus::GpPen *pen;
-        GdipCreatePen1(borderColor_, 1.f, Gdiplus::UnitPixel, &pen);
+        GdipCreatePen1(borderColor_, 2.f, Gdiplus::UnitPixel, &pen);
         Gdiplus::GpSolidFill *brush;
         GdipCreateSolidFill(fillColor_, &brush);
 
@@ -53,7 +54,11 @@ namespace danmaku
         // 创建与边界矩形等大的位图（32位PARGB格式，支持透明通道）
         GdipCreateBitmapFromScan0(
             pathRect.Width, pathRect.Height,
-            0, PixelFormat32bppPARGB, nullptr, &bitmap_);
+            0,
+            PixelFormat32bppPARGB,
+            nullptr,
+            &bitmap_
+        );
         {
             // 从位图获取图形上下文，用于绘制文本
             Gdiplus::GpGraphics *g;
@@ -72,8 +77,8 @@ namespace danmaku
             GdipSetWorldTransform(g, mat);
 
             // 填充路径（文本主体）并绘制路径边框
-            GdipFillPath(g, brush, path);
             GdipDrawPath(g, pen, path);
+            GdipFillPath(g, brush, path);
 
             // 清理本次绘制使用的临时资源
             GdipDeleteGraphics(g);
