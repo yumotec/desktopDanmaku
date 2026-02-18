@@ -6,11 +6,10 @@ using namespace Gdiplus::DllExports;
 
 namespace danmaku
 {
-    // 将弹幕文本光栅化为位图，供后续绘制使用
     void danmakuItem::rasterize()
     {
-        // 断言：当前不应已有位图，避免资源泄漏
-        assert(!bitmap_);
+        if (bitmap_)
+            return;
 
         // TODO 拆离字体逻辑，对接全局字体管理
         // TODO 允许自定义字体属性（如字体名称、加粗、斜体等）
@@ -50,6 +49,8 @@ namespace danmaku
         // 获取路径的世界边界矩形（考虑到边框宽度，传入画笔）
         Gdiplus::Rect pathRect;
         GdipGetPathWorldBoundsI(path, &pathRect, nullptr, pen);
+        width_ = pathRect.Width;
+        height_ = pathRect.Height;
 
         // 创建与边界矩形等大的位图（32位PARGB格式，支持透明通道）
         GdipCreateBitmapFromScan0(
@@ -94,13 +95,13 @@ namespace danmaku
     }
 
     // 在指定的图形上下文中绘制弹幕位图
-    Gdiplus::Status danmakuItem::draw(Gdiplus::GpGraphics *g, int x, int y)
+    Gdiplus::Status danmakuItem::draw(Gdiplus::GpGraphics *g, float x, float y)
     {
         // 若尚未光栅化，则立即执行
         if (!bitmap_)
             rasterize();
         // 在位图的指定位置绘制图像
-        return GdipDrawImageI(g, bitmap_, x, y);
+        return GdipDrawImage(g, bitmap_, x, y);
     }
 
     // 移动构造函数
@@ -118,6 +119,8 @@ namespace danmaku
         width_ = x.width_;
         height_ = x.height_;
         emSize_ = x.emSize_;
+        x_ = x.x_;
+        speed_ = x.speed_;
 
         // 源对象不再拥有位图所有权，置空防止其析构时释放
         x.bitmap_ = nullptr;
@@ -145,6 +148,8 @@ namespace danmaku
         width_ = x.width_;
         height_ = x.height_;
         emSize_ = x.emSize_;
+        x_ = x.x_;
+        speed_ = x.speed_;
 
         // 源对象置空，避免双重释放
         x.bitmap_ = nullptr;
@@ -159,7 +164,6 @@ namespace danmaku
             GdipDisposeImage(bitmap_);
     }
 
-    // 使当前缓存的位图失效，下次绘制时会重新光栅化
     void danmakuItem::invalidateCache()
     {
         if (bitmap_)

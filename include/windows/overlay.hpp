@@ -4,7 +4,7 @@
 #include "base.hpp"
 #include "elements.hpp"
 #include "font.hpp"
-#include "danmaku/dmkitem.hpp"
+#include "danmaku/dmkmgr.hpp"
 
 namespace danmaku
 {
@@ -22,8 +22,7 @@ namespace danmaku
         Gdiplus::GpGraphics *graphics_{};
         int width_{}, height_{}; // 客户区
 
-        // TODO 弹幕管理
-        std::vector<danmakuItem> danmaku_{};
+        danmakuManager danmakuMgr_;
 
         BOOL layoutFullscreen();
 
@@ -47,8 +46,14 @@ namespace danmaku
         // 添加弹幕的方法
         void addDanmaku(const std::wstring &text, float emSize, Gdiplus::ARGB fillColor, Gdiplus::ARGB borderColor)
         {
-            danmaku_.emplace_back(text, emSize, fillColor, borderColor);
-            paint(); // 重新绘制以显示新弹幕
+            danmakuMgr_.addDanmaku(danmakuItem{text, emSize, fillColor, borderColor});
+            paint();
+        }
+
+        void tick(float dt)
+        {
+            danmakuMgr_.tick(dt);
+            paint();
         }
     };
 }

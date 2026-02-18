@@ -2,6 +2,9 @@
 
 using namespace Gdiplus::DllExports;
 
+constexpr UINT_PTR TimerWorldTick = 1;      // 定时器ID
+constexpr UINT TimerWorldTickInterval = 14; // 定时器间隔
+
 namespace danmaku
 {
     // 获取主监视器的句柄
@@ -88,21 +91,11 @@ namespace danmaku
     {
         // 窗口客户区矩形
         const RECT rc{0, 0, width_, height_};
-        // 用黑色画布填充整个窗口背景
+        // 清除
         FillRect(cdc_, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
-        // for (int i = 0; i < 1; ++i)
-        //{
-        //  起始绘制坐标
-        int x = 200, y = 100;
-        // 逐条绘制弹幕
-        for (auto &item : danmaku_)
-        {
-            item.draw(graphics_, x, y);
-            x += 250;
-            y += 90;
-        }
-        //}
+        danmakuMgr_.draw(graphics_);
+
         // 设置分层窗口的混合参数（逐像素alpha）
         constexpr BLENDFUNCTION BlendFuncAlpha{AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
         constexpr POINT SourcePoint{};    // 源DC中的起始点 (0,0)
@@ -126,20 +119,28 @@ namespace danmaku
     {
         switch (uMsg)
         {
+        case WM_TIMER:
+            if (wParam == TimerWorldTick)
+            {
+                tick(TimerWorldTickInterval / 1000.0f); // 将毫秒转换为秒
+            }
+            break;
         case WM_CREATE:
-            // 绘制
+            // TEMP 测试
+            danmakuMgr_.setLineHeight(40);    // 设置行高，确保弹幕之间有足够的间距
+            danmakuMgr_.setLineGap(10);       // 设置行距，确保弹幕之间有足够的间距
+            danmakuMgr_.setDuration(5.0f);    // 设置弹幕通过屏幕的时间]
+            danmakuMgr_.setItemGap(10);       // 设置弹幕之间的最小像素间距
+            danmakuMgr_.setSpeedFactor(1.0f); // 设置整体速度倍率
             layoutFullscreen();
-            // // TODO 测试用
-            // danmaku_.emplace_back(L"测试文本 1", 70, 0xff'66ccff, 0xff'ffcc66);
-            // danmaku_.emplace_back(L"测试文本 2", 70, 0xff'ff0000, 0xff'0000ff);
-            // danmaku_.emplace_back(L"测试文本 3", 70, 0xff'00ff00, 0xff'0000ff);
-            // danmaku_.emplace_back(L"测试文本 4", 70, 0xff'0000ff, 0xff'00ffff);
-
+            SetTimer(hwnd, TimerWorldTick, TimerWorldTickInterval, nullptr); // 启动定时器
             break;
         case WM_SIZE:
             // 更新窗口尺寸并重新创建内存DC
             width_ = LOWORD(lParam);
             height_ = HIWORD(lParam);
+            danmakuMgr_.setScreenSize(width_, height_);
+            danmakuMgr_.recalculateTracks();
             recreateMemoryDC();
             break;
         case WM_DISPLAYCHANGE:

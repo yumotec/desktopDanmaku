@@ -152,5 +152,5 @@ void buttonClickHandler()
     }
 
     // 发送后清空输入框
-    SetDlgItemText(g_elemEditContent->getParentHwnd(), g_elemEditContent->getID(), L"");
+    //SetDlgItemText(g_elemEditContent->getParentHwnd(), g_elemEditContent->getID(), L"");
 }
