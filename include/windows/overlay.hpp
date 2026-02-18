@@ -27,11 +27,10 @@ namespace danmaku
         BOOL layoutFullscreen();
 
         void recreateMemoryDC();
-
     public:
-        PCWSTR ClassName() const override { return L"Danmaku.WndCls.Overlay"; }
+        PCWSTR className() const override { return L"Danmaku.WndCls.Overlay"; }
 
-        LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+        LRESULT handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
         overlayWindow &create();
 

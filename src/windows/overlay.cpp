@@ -112,7 +112,7 @@ namespace danmaku
     }
 
     // 消息处理
-    LRESULT overlayWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+    LRESULT overlayWindow::handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         switch (uMsg)
         {
@@ -124,13 +124,13 @@ namespace danmaku
             break;
         case WM_CREATE:
             // TEMP 测试
-            danmakuMgr_.setLineHeight(40);    // 设置行高，确保弹幕之间有足够的间距
-            danmakuMgr_.setLineGap(10);       // 设置行距，确保弹幕之间有足够的间距
-            danmakuMgr_.setDuration(5.0f);    // 设置弹幕通过屏幕的时间]
-            danmakuMgr_.setItemGap(10);       // 设置弹幕之间的最小像素间距
-            danmakuMgr_.setSpeedFactor(1.0f); // 设置整体速度倍率
+            danmakuMgr_.setLineHeight(40);
+            danmakuMgr_.setLineGap(10);
+            danmakuMgr_.setDuration(5.0f);
+            danmakuMgr_.setItemGap(10);
+            danmakuMgr_.setSpeedFactor(1.0f);
             layoutFullscreen();
-            SetTimer(hwnd, TimerWorldTick, TimerWorldTickInterval, nullptr); // 启动定时器
+            SetTimer(hwnd, TimerWorldTick, TimerWorldTickInterval, nullptr);
             break;
         case WM_SIZE:
             // 更新窗口尺寸并重新创建内存DC
@@ -160,17 +160,17 @@ namespace danmaku
         WNDCLASSW wc{};
         // 窗口样式：当宽度或高度改变时重绘窗口
         wc.style = CS_HREDRAW | CS_VREDRAW;
-        wc.lpfnWndProc = baseWindow::wndProc<overlayWindow>;
-        wc.hInstance = GetModuleHandle(nullptr);
+        wc.lpfnWndProc = baseWindow::wndProc;
+        wc.hInstance = GetModuleHandleW(nullptr);
         wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-        wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH));
-        wc.lpszClassName = ClassName();
+        wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+        wc.lpszClassName = className();
 
         if (!RegisterClassW(&wc))
         {
             debug::logOutput(L"[错误] 主窗口类注册错误\n");
             debug::logWinError(GetLastError());
-            MessageBox(nullptr, L"（0001）主窗口：窗口类注册失败", L"出错了欸", MB_ICONERROR | MB_OK);
+            MessageBoxW(nullptr, L"（0001）主窗口：窗口类注册失败", L"出错了欸", MB_ICONERROR | MB_OK);
             return *this;
         }
 
@@ -179,13 +179,13 @@ namespace danmaku
             wc.lpszClassName, nullptr,
             WS_POPUP | WS_VISIBLE,
             0, 0, 400, 400,
-            nullptr, nullptr, GetModuleHandle(nullptr), this);
+            nullptr, nullptr, GetModuleHandleW(nullptr), this);
 
         if (!hwnd)
         {
             debug::logOutput(L"[错误] 主窗口创建失败\n");
             debug::logWinError(GetLastError());
-            MessageBox(nullptr, L"（0002）主窗口：创建窗口失败", L"出错了欸", MB_ICONERROR | MB_OK);
+            MessageBoxW(nullptr, L"（0002）主窗口：创建窗口失败", L"出错了欸", MB_ICONERROR | MB_OK);
         }
         return *this;
     }
