@@ -71,7 +71,7 @@ makefile从[keybonk项目](https://github.com/xiaoditx/keybonk)中移植而来�
 开发环境
 
 - Windows10-x64
-- MSYS2（MingGW64）
+- MSYS2（MinGW64）
 - VScode
 - GNU Make（4.4.1）
 
