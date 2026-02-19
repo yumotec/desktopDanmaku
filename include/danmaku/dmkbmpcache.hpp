@@ -53,17 +53,27 @@ namespace danmaku
                 width = 0;
                 height = 0;
             }
-    };
+        };
+
     private:
+        static inline DanmakuBitmapCache *instance_{};
+
         std::vector<Bitmap> cache_{};
         SrwLock lock_{};
 
         DanmakuBitmapCache() = default;
+
     public:
         static DanmakuBitmapCache &instance()
         {
-            static DanmakuBitmapCache cache{};
-            return cache;
+            return *instance_;
+        }
+
+        static void startup() { instance_ = new DanmakuBitmapCache{}; }
+        static void shutdown()
+        {
+            delete instance_;
+            instance_ = nullptr;
         }
 
         BOOL allocate(int width, int height, Bitmap &outBmp);

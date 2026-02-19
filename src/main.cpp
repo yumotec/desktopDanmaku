@@ -50,6 +50,8 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
 
     // 主窗口
     MSG msg;
+    
+    danmaku::DanmakuBitmapCache::startup();
     {
         danmaku::MainWindow mainWindowObj;
         mainWindowObj.create(L"桌面弹幕", 500, 300).show();
@@ -65,8 +67,10 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
         }
+
     } // GDI+关闭前析构
 
+    danmaku::DanmakuBitmapCache::shutdown();
     Gdiplus::GdiplusShutdown(g_gpToken);
 
     return (int)msg.wParam;
