@@ -78,7 +78,7 @@ namespace danmaku
         // 删除旧的位图，准备创建新尺寸的位图
         DeleteObject(bitmap_);
         // 创建与窗口DC兼容的位图，大小为当前窗口的宽度和高度
-        //bitmap_ = CreateCompatibleBitmap(dc, width_, height_);
+        // bitmap_ = CreateCompatibleBitmap(dc, width_, height_);
         BITMAPINFO bmi{};
         bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmi.bmiHeader.biWidth = width_;
@@ -94,12 +94,30 @@ namespace danmaku
 
     void overlayWindow::paint()
     {
-        // 窗口客户区矩形
-        const RECT rc{0, 0, width_, height_};
+        const auto &dirtyRect = danmakuMgr_.getDirtyRect();
+        if (IsRectEmpty(&dirtyRect))
+            return;
         // 清除
-        FillRect(cdc_, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+        FillRect(cdc_, &dirtyRect, (HBRUSH)GetStockObject(BLACK_BRUSH));
 
         danmakuMgr_.drawGdi(cdc_, cdcTemp_);
+
+#ifdef _DEBUG
+        // 脏矩形参考边框
+        if (0)
+        {
+            GpPtr<Gdiplus::GpGraphics> g;
+            GdipCreateFromHDC(cdc_, &g);
+            GpPtr<Gdiplus::GpPen> pen;
+            GdipCreatePen1(0xffff0000, 2.f, Gdiplus::UnitPixel, &pen);
+            GdipSetPenMode(pen.get(), Gdiplus::PenAlignmentInset);
+            GdipDrawRectangle(g.get(), pen.get(),
+                              dirtyRect.left,
+                              dirtyRect.top,
+                              dirtyRect.right - dirtyRect.left,
+                              dirtyRect.bottom - dirtyRect.top);
+        }
+#endif // _DEBUG
 
         // 设置分层窗口的混合参数（逐像素alpha）
         constexpr BLENDFUNCTION BlendFuncAlpha{AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
@@ -114,7 +132,10 @@ namespace danmaku
         ulwi.pptSrc = &SourcePoint;    // 源DC中绘制的起点
         ulwi.pblend = &BlendFuncAlpha; // 混合函数参数
         ulwi.dwFlags = ULW_ALPHA;      // 使用 alpha 混合
-        ulwi.prcDirty = nullptr;       // 整个窗口全部更新
+        const RECT clientRect{0, 0, width_, height_};
+        RECT realRect;
+        IntersectRect(&realRect, &dirtyRect, &clientRect);
+        ulwi.prcDirty = &realRect;
 
         UpdateLayeredWindowIndirect(hwnd, &ulwi);
     }

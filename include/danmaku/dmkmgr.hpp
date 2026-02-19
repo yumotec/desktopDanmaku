@@ -23,10 +23,11 @@ namespace danmaku
         float itemGap_{};
         float speedFactor_{};
         std::vector<Track> tracks_{};
+        RECT dirtyRect_{};
+        RECT dirtyRectLast_{};
 
         // 从上到下寻找第一个合适轨道
         size_t findBestTrack(float itemSpeed) const;
-
     public:
         // WARNING 尺寸、行高、行距改变后必须调用本函数
         void recalculateTracks();
@@ -50,5 +51,8 @@ namespace danmaku
         void setDuration(float duration) { duration_ = duration; }
         void setItemGap(float gap) { itemGap_ = gap; }
         void setSpeedFactor(float factor) { speedFactor_ = factor; }
+
+        // WARNING 可能超出屏幕范围
+        auto &getDirtyRect() const { return dirtyRect_; }
     };
 }

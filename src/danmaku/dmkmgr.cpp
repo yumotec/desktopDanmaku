@@ -64,6 +64,7 @@ namespace danmaku
 
     void danmakuManager::tick(float dt)
     {
+        RECT newRect{ INT_MAX, INT_MAX, INT_MIN, INT_MIN };
         for (auto &track : tracks_)
         {
             for (auto it = track.items.begin(); it != track.items.end();)
@@ -72,9 +73,25 @@ namespace danmaku
                 if (it->getX() + it->getWidth() <= 0.f)
                     it = track.items.erase(it);
                 else
+                {
+                    const auto l = (int)floorf(it->getX());
+                    const auto r = (int)ceilf(it->getX() + it->getWidth());
+                    const auto t = (int)floorf(track.y);
+                    const auto b = (int)ceilf(track.y + it->getHeight());
+                    if (l < newRect.left)
+                        newRect.left = l;
+                    if (r > newRect.right)
+                        newRect.right = r;
+                    if (t < newRect.top)
+                        newRect.top = t;
+                    if (b > newRect.bottom)
+                        newRect.bottom = b;
                     ++it;
+                }
             }
         }
+        UnionRect(&dirtyRect_, &dirtyRectLast_, &newRect);
+        dirtyRectLast_ = newRect;
     }
 
     Gdiplus::Status danmakuManager::draw(Gdiplus::GpGraphics *g)
