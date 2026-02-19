@@ -1,11 +1,6 @@
 #ifndef DANMAKU_ELEMENTS_HPP
 #define DANMAKU_ELEMENTS_HPP
-#include <windows.h>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <mutex>
-#include <stdexcept>
+
 #include "windows/font.hpp"
 #include "windows/extraElementInfo.hpp"
 #include "debug.hpp"
@@ -103,4 +98,5 @@ namespace danmaku
 
     Element &searchID(UINT_PTR id);
 }
+
 #endif // DANMAKU_ELEMENTS_HPP

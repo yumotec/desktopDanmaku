@@ -1,6 +1,6 @@
 #ifndef DANMAKU_FONT_HPP
 #define DANMAKU_FONT_HPP
-#include <windows.h>
+
 namespace danmaku
 {
     // Font 类封装了 Windows API 中的字体对象，提供了创建和管理字体的功能
@@ -46,4 +46,5 @@ namespace danmaku
         }
     };
 }
+
 #endif // DANMAKU_FONT_HPP

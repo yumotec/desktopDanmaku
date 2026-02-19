@@ -1,9 +1,5 @@
-#include <windows.h>
-
-#include <vector>
-
-#include "functions/gpptr.hpp"
-#include "functions/srwlk.hpp"
+#ifndef DANMAKU_DMKBMPCACHE_HPP
+#define DANMAKU_DMKBMPCACHE_HPP
 
 namespace danmaku
 {
@@ -69,6 +65,8 @@ namespace danmaku
             return *instance_;
         }
 
+        // 必须与GDI+全局生命周期同步
+
         static void startup() { instance_ = new DanmakuBitmapCache{}; }
         static void shutdown()
         {
@@ -81,3 +79,5 @@ namespace danmaku
         void free(Bitmap &&bmp);
     };
 }
+
+#endif // DANMAKU_DMKBMPCACHE_HPP

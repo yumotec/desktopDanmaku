@@ -1,8 +1,6 @@
 #ifndef DANMAKU_MAIN_WINDOW_HPP
 #define DANMAKU_MAIN_WINDOW_HPP
 
-#include <windows.h>
-#include <string>
 #include "overlay.hpp"
 
 namespace danmaku

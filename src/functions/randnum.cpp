@@ -1,36 +1,85 @@
+#include "pch.hpp"
 #include "functions/randnum.hpp"
-#include <random>
-#include <chrono>
-#include <algorithm>
 
 namespace random
 {
-    // 获取全局随机数生成器的单例引用
-    // 使用Mersenne Twister 19937算法，线程安全（C++11保证静态局部变量初始化线程安全）
-    static std::mt19937 &getGenerator()
+    class RmPcg32
     {
-        // 静态局部变量，首次调用时初始化，后续调用返回同一实例
-        static std::mt19937 generator(
-            []() // 使用lambda表达式进行延迟初始化
+    public:
+        using TSeed = UINT64;
+
+        constexpr static UINT64 Multiplier = 6364136223846793005ull;
+        constexpr static UINT64 Increment = 1442695040888963407ull;
+
+        static UINT64 DefaultSeed() noexcept { return GetTickCount64(); }
+
+    private:
+        UINT64 State;
+
+    public:
+        constexpr RmPcg32(UINT64 Seed = GetTickCount64()) noexcept : State{Seed + Increment} {}
+
+        constexpr UINT Next32() noexcept
+        {
+            const auto Old = State;
+            State = Old * Multiplier + Increment;
+            const auto XorShifted = UINT((Old ^ (Old >> 18)) >> 27);
+            const auto Rot = UINT(Old >> 59);
+            return XorShifted >> Rot | XorShifted << (-Rot & 31);
+        }
+
+        constexpr void Seed(UINT64 Seed) noexcept { State = Seed + Increment; }
+    };
+
+    template <class TBase>
+    struct Random : public TBase
+    {
+        using TBase::Next32;
+
+        constexpr Random(typename TBase::TSeed Seed = TBase::DefaultSeed()) noexcept : TBase{Seed} {}
+
+        template <class T = UINT>
+        constexpr T Next() noexcept
+        {
+            if constexpr (sizeof(T) == 64)
+                return (Next32() << 32) | Next32();
+            else
+                return (T)Next32();
+        }
+        template <class T>
+        constexpr T NextInt(T Min, T Max) noexcept
+        {
+            using TUnsigned = std::make_unsigned_t<T>;
+            using TLimits = std::numeric_limits<TUnsigned>;
+
+            const auto Span = (TUnsigned)Max - (TUnsigned)Min + 1;
+            const auto Limit = TLimits::max() - (TLimits::max() % Span);
+            TUnsigned r;
+            do
             {
-                // 创建真随机数设备，用于获取随机种子
-                std::random_device rd;
+                r = Next<TUnsigned>();
+            } while (r >= Limit);
+            return Min + T(r % Span);
+        }
+        template <class T>
+        constexpr T NextFloat(T Min, T Max) noexcept
+        {
+            if constexpr (std::is_same_v<T, float>)
+            {
+                const auto r = Next32() >> 8;
+                return Min + (r / 16777216.f /* 2^24 */) * (Max - Min);
+            }
+            else
+            {
+                const auto r = ((UINT64)Next32() << 21) ^ (Next32() >> 11);
+                return Min + (r / 9007199254740992. /* 2^53 */) * (Max - Min);
+            }
+        }
+    };
 
-                // 混合两种随机源生成种子：
-                // 1. random_device的真随机数
-                // 2. 当前时间戳（纳秒计数）
-                // 使用异或操作混合两个随机源，增加熵值
-                auto seed = rd() ^ static_cast<unsigned int>(
-                                       std::chrono::system_clock::now().time_since_epoch().count());
+    static Random<RmPcg32> Generator;
+    static SrwLock GeneratorLock;
 
-                // 使用混合后的种子初始化Mersenne Twister生成器
-                std::mt19937 gen(seed);
-                // 预热，丢弃前10个随机数，Mersenne Twister初始状态的前几个数值随机性较差
-                gen.discard(10);
-                return gen;
-            }()); // lambda立即调用，返回初始化好的生成器
-        return generator;
-    }
     // 生成[min, max]范围内的均匀分布随机整数
     // 参数：
     //   min - 范围下限（包含）
@@ -41,10 +90,8 @@ namespace random
         // 确保min <= max，如果输入相反则交换
         if (min > max)
             std::swap(min, max);
-        // 创建均匀整数分布器
-        std::uniform_int_distribution<int> dist(min, max);
-        // 使用全局生成器产生随机数
-        return dist(getGenerator());
+        SrwExclusiveGuard _{GeneratorLock};
+        return Generator.NextInt(min, max);
     }
     // 生成[min, max)范围内的均匀分布随机浮点数（左闭右开）
     // 参数：
@@ -56,9 +103,7 @@ namespace random
         // 确保min <= max，如果输入相反则交换
         if (min > max)
             std::swap(min, max);
-        // 创建均匀实数分布器（默认区间为[min, max)）
-        std::uniform_real_distribution<double> dist(min, max);
-        // 使用全局生成器产生随机数
-        return dist(getGenerator());
+        SrwExclusiveGuard _{GeneratorLock};
+        return Generator.NextFloat(min, max);
     }
 }

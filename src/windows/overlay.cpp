@@ -1,4 +1,6 @@
+#include "pch.hpp"
 #include "windows/overlay.hpp"
+#include "functions/randnum.hpp"
 
 using namespace Gdiplus::DllExports;
 
@@ -7,28 +9,25 @@ constexpr UINT TimerWorldTickInterval = 14; // 定时器间隔
 
 namespace danmaku
 {
+    static BOOL CALLBACK monitorEnumProc(
+        HMONITOR monitor, HDC, LPRECT, LPARAM param)
+    {
+        MONITORINFO mi;
+        mi.cbSize = sizeof(mi);
+        if (GetMonitorInfoW(monitor, &mi) && (mi.dwFlags & MONITORINFOF_PRIMARY))
+        {
+            *(HMONITOR *)param = monitor;
+            return FALSE;
+        }
+        return TRUE;
+    }
     // 获取主监视器的句柄
     static HMONITOR getPrimaryMonitor()
     {
         // 主监视器句柄
         HMONITOR monitor{};
         // 枚举所有监视器，直到找到主监视器
-        EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC, RECT *, LPARAM lParam) -> BOOL
-                            {
-            // 监视器信息变量
-            MONITORINFO mi;
-            mi.cbSize = sizeof(mi);
-            // 获取监视器信息
-            GetMonitorInfoW(hMonitor, &mi);
-            // 如果该监视器是主监视器，则将其句柄存储在lParam指向的变量中，并停止枚举
-            // 这里就是存入了monitor变量
-            if (mi.dwFlags & MONITORINFOF_PRIMARY)
-            {
-                *(HMONITOR*)lParam = hMonitor;
-                return FALSE;
-            }
-            else
-                return TRUE; }, (LPARAM)&monitor);
+        EnumDisplayMonitors(nullptr, nullptr, monitorEnumProc, (LPARAM)&monitor);
         return monitor;
     }
 
@@ -78,14 +77,7 @@ namespace danmaku
         // 删除旧的位图，准备创建新尺寸的位图
         DeleteObject(bitmap_);
         // 创建与窗口DC兼容的位图，大小为当前窗口的宽度和高度
-        // bitmap_ = CreateCompatibleBitmap(dc, width_, height_);
-        BITMAPINFO bmi{};
-        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        bmi.bmiHeader.biWidth = width_;
-        bmi.bmiHeader.biHeight = -height_;
-        bmi.bmiHeader.biPlanes = 1;
-        bmi.bmiHeader.biBitCount = 32;
-        bitmap_ = CreateDIBSection(dc, &bmi, DIB_RGB_COLORS, nullptr, nullptr, 0);
+        bitmap_ = CreateCompatibleBitmap(dc, width_, height_);
         // 将新位图选入内存DC，并保存旧的位图对象指针以便后续恢复
         oldObject_ = SelectObject(cdc_, bitmap_);
 
@@ -109,7 +101,8 @@ namespace danmaku
             GpPtr<Gdiplus::GpGraphics> g;
             GdipCreateFromHDC(cdc_, &g);
             GpPtr<Gdiplus::GpPen> pen;
-            GdipCreatePen1(0xffff0000, 2.f, Gdiplus::UnitPixel, &pen);
+            GdipCreatePen1(0xff'000000 | random::getInt(0, 0xffffff),
+                           2.f, Gdiplus::UnitPixel, &pen);
             GdipSetPenMode(pen.get(), Gdiplus::PenAlignmentInset);
             GdipDrawRectangle(g.get(), pen.get(),
                               dirtyRect.left,

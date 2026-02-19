@@ -1,3 +1,4 @@
+#include "pch.hpp"
 #include "windows/elements.hpp"
 
 namespace danmaku

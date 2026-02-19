@@ -1,9 +1,6 @@
 #ifndef STR_HPP
 #define STR_HPP
 
-#include <string>
-#include <cstddef>
-
 /**
  * 统计字符串的观感字数
  * 规则：

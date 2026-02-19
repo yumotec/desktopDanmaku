@@ -1,6 +1,7 @@
-#include "dmkitem.hpp"
+#ifndef DANMAKU_DMKMGR_HPP
+#define DANMAKU_DMKMGR_HPP
 
-#include <vector>
+#include "dmkitem.hpp"
 
 namespace danmaku
 {
@@ -56,3 +57,5 @@ namespace danmaku
         auto &getDirtyRect() const { return dirtyRect_; }
     };
 }
+
+#endif // DANMAKU_DMKMGR_HPP
