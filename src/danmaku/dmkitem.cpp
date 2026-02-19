@@ -6,9 +6,9 @@ using namespace Gdiplus::DllExports;
 
 namespace danmaku
 {
-    void danmakuItem::rasterize()
+    void DanmakuItem::rasterize()
     {
-        if (bitmap_.get())
+        if (bitmap_.bitmap.get())
             return;
 
         // TODO 拆离字体逻辑，对接全局字体管理
@@ -48,20 +48,14 @@ namespace danmaku
         // 获取路径的世界边界矩形（考虑到边框宽度，传入画笔）
         Gdiplus::Rect pathRect;
         GdipGetPathWorldBoundsI(path.get(), &pathRect, nullptr, pen.get());
-        width_ = pathRect.Width;
-        height_ = pathRect.Height;
+        width_ = ceilf(pathRect.Width);
+        height_ = ceilf(pathRect.Height);
 
-        // 创建与边界矩形等大的位图（32位PARGB格式，支持透明通道）
-        GdipCreateBitmapFromScan0(
-            pathRect.Width, pathRect.Height,
-            0,
-            PixelFormat32bppPARGB,
-            nullptr,
-            &bitmap_);
+        DanmakuBitmapCache::instance().allocate((int)width_, (int)height_, bitmap_);
 
         // 从位图获取图形上下文，用于绘制文本
         GpPtr<Gdiplus::GpGraphics> g;
-        GdipGetImageGraphicsContext(bitmap_.get(), &g);
+        GdipGetImageGraphicsContext(bitmap_.bitmap.get(), &g);
 
         // 开启抗锯齿，使文本边缘平滑
         GdipSetSmoothingMode(g.get(), Gdiplus::SmoothingModeAntiAlias);
@@ -81,17 +75,28 @@ namespace danmaku
     }
 
     // 在指定的图形上下文中绘制弹幕位图
-    Gdiplus::Status danmakuItem::draw(Gdiplus::GpGraphics *g, float x, float y)
+    Gdiplus::Status DanmakuItem::draw(Gdiplus::GpGraphics *g, float x, float y)
     {
         // 若尚未光栅化，则立即执行
-        if (!bitmap_.get())
+        if (!bitmap_.bitmap.get())
             rasterize();
         // 在位图的指定位置绘制图像
-        return GdipDrawImage(g, bitmap_.get(), x, y);
+        return GdipDrawImage(g, bitmap_.bitmap.get(), x, y);
     }
 
-    void danmakuItem::invalidateCache()
+    BOOL DanmakuItem::drawGdi(HDC dcDst, HDC cdc, float x, float y)
     {
+        if (!bitmap_.bitmap.get())
+            rasterize();
+        SelectObject(cdc, bitmap_.dib);
+        constexpr BLENDFUNCTION BlendFuncAlpha{AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+        return GdiAlphaBlend(dcDst, (int)x, (int)y, (int)width_, (int)height_,
+                             cdc, 0, 0, (int)width_, (int)height_, BlendFuncAlpha);
+    }
+
+    void DanmakuItem::invalidateCache()
+    {
+        DanmakuBitmapCache::instance().free(std::move(bitmap_));
         bitmap_.clear();
     }
 }

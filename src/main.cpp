@@ -10,23 +10,27 @@
 #include "main.hpp"
 
 // 向前声明
-void init_creatElement(danmaku::baseWindow &mainWND);
+void init_creatElement(danmaku::BaseWindow &mainWND);
 void buttonClickHandler();
 
 // 全局 GDI+ token
 ULONG_PTR g_gpToken{};
-// 全局 overlayWindow 指针，用于在按钮点击时添加弹幕
-danmaku::overlayWindow *g_overlayWindow = nullptr;
+// 全局 OverlayWindow 指针，用于在按钮点击时添加弹幕
+danmaku::OverlayWindow *g_overlayWindow = nullptr;
 // 全局 optional 变量
-std::optional<danmaku::element> g_elemLabelAppName;
-std::optional<danmaku::element> g_elemLabelPrompt;
-std::optional<danmaku::element> g_elemEditContent;
-std::optional<danmaku::element> g_elemButton;
+std::optional<danmaku::Element> g_elemLabelAppName;
+std::optional<danmaku::Element> g_elemLabelPrompt;
+std::optional<danmaku::Element> g_elemEditContent;
+std::optional<danmaku::Element> g_elemButton;
+std::optional<danmaku::Element> g_elemLabelAppName;
+std::optional<danmaku::Element> g_elemLabelPrompt;
+std::optional<danmaku::Element> g_elemEditContent;
+std::optional<danmaku::Element> g_elemButton;
 // ↓ 后期将会禁用
-std::optional<danmaku::element> g_elemLabelColor1;
-std::optional<danmaku::element> g_elemEditColor1;
-std::optional<danmaku::element> g_elemLabelColor2;
-std::optional<danmaku::element> g_elemEditColor2;
+std::optional<danmaku::Element> g_elemLabelColor1;
+std::optional<danmaku::Element> g_elemEditColor1;
+std::optional<danmaku::Element> g_elemLabelColor2;
+std::optional<danmaku::Element> g_elemEditColor2;
 
 int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance,
                     [[maybe_unused]] PWSTR pCmdLine, [[maybe_unused]] int nCmdShow)
@@ -56,8 +60,10 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
 
     // 主窗口
     MSG msg;
+    
+    danmaku::DanmakuBitmapCache::startup();
     {
-        danmaku::mainWindow mainWindowObj;
+        danmaku::MainWindow mainWindowObj;
         mainWindowObj.create(L"桌面弹幕", 500, 300).show();
 
         // 获取overlayWindow实例的指针
@@ -71,26 +77,28 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
         }
+
     } // GDI+关闭前析构
 
+    danmaku::DanmakuBitmapCache::shutdown();
     Gdiplus::GdiplusShutdown(g_gpToken);
 
     return (int)msg.wParam;
 }
 
 // 默认字体对象，微软雅黑字体，大小为24
-danmaku::font defaultFont(L"微软雅黑", 24);
-danmaku::labelExtraInfo lei{
+danmaku::Font defaultFont(L"微软雅黑", 24);
+danmaku::LabelExtraInfo lei{
     RGB(0, 0, 0),      // 黑色文本
     RGB(255, 255, 255) // 白色背景
 };
-danmaku::buttonExtraInfo bei{
+danmaku::ButtonExtraInfo bei{
     buttonClickHandler,
     nullptr, // 暂无
     nullptr  // 暂无
 };
 
-void init_creatElement(danmaku::baseWindow &mainWND)
+void init_creatElement(danmaku::BaseWindow &mainWND)
 {
     // 软件名标签
     g_elemLabelAppName.emplace(

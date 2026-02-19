@@ -4,7 +4,7 @@
 
 namespace danmaku
 {
-    class danmakuManager
+    class DanmakuManager
     {
     private:
         constexpr static size_t InvalidTrack = std::numeric_limits<size_t>::max();
@@ -12,7 +12,7 @@ namespace danmaku
         struct Track
         {
             float y{};
-            std::vector<danmakuItem> items{};
+            std::vector<DanmakuItem> items{};
         };
 
         float screenWidth_{};
@@ -23,20 +23,23 @@ namespace danmaku
         float itemGap_{};
         float speedFactor_{};
         std::vector<Track> tracks_{};
+        RECT dirtyRect_{};
+        RECT dirtyRectLast_{};
 
         // 从上到下寻找第一个合适轨道
         size_t findBestTrack(float itemSpeed) const;
-
     public:
         // WARNING 尺寸、行高、行距改变后必须调用本函数
         void recalculateTracks();
 
-        bool addDanmaku(danmakuItem &&item);
+        bool addDanmaku(DanmakuItem &&item);
 
         // dt单位为秒
         void tick(float dt);
 
         Gdiplus::Status draw(Gdiplus::GpGraphics *g);
+
+        BOOL drawGdi(HDC dcDst, HDC cdc);
 
         void setScreenSize(float width, float height)
         {
@@ -48,5 +51,8 @@ namespace danmaku
         void setDuration(float duration) { duration_ = duration; }
         void setItemGap(float gap) { itemGap_ = gap; }
         void setSpeedFactor(float factor) { speedFactor_ = factor; }
+
+        // WARNING 可能超出屏幕范围
+        auto &getDirtyRect() const { return dirtyRect_; }
     };
 }

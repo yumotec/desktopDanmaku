@@ -1,22 +1,20 @@
 #ifndef DANMAKU_DMKITEM_HPP
 #define DANMAKU_DMKITEM_HPP
 
-#include <windows.h>
-#include <gdiplus.h>
+#include "dmkbmpcache.hpp"
 
 #include <string>
 
-#include "functions/gpptr.hpp"
 
 namespace danmaku
 {
-    class danmakuItem
+    class DanmakuItem
     {
     private:
         Gdiplus::ARGB fillColor_{};
         Gdiplus::ARGB borderColor_{};
         std::wstring text_{};
-        GpPtr<Gdiplus::GpBitmap> bitmap_{};
+        DanmakuBitmapCache::Bitmap bitmap_{};
         float width_{};
         float height_{};
         float emSize_{};
@@ -31,13 +29,15 @@ namespace danmaku
 
         Gdiplus::Status draw(Gdiplus::GpGraphics *g, float x, float y);
 
-        danmakuItem() = default;
-        danmakuItem(const danmakuItem &) = delete;
-        danmakuItem &operator=(const danmakuItem &) = delete;
-        danmakuItem(danmakuItem &&) = default;
-        danmakuItem &operator=(danmakuItem &&) = default;
+        BOOL drawGdi(HDC dcDst, HDC cdc, float x, float y);
 
-        danmakuItem(
+        DanmakuItem() = default;
+        DanmakuItem(const DanmakuItem &) = delete;
+        DanmakuItem &operator=(const DanmakuItem &) = delete;
+        DanmakuItem(DanmakuItem &&) = default;
+        DanmakuItem &operator=(DanmakuItem &&) = default;
+
+        DanmakuItem(
             std::wstring_view text,
             float emSize,
             Gdiplus::ARGB fillColor,
@@ -46,6 +46,11 @@ namespace danmaku
                                          text_{text},
                                          emSize_{emSize}
         {
+        }
+
+        ~DanmakuItem()
+        {
+            invalidateCache();
         }
 
         void setX(float x) { x_ = x; }
