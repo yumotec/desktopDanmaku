@@ -1,8 +1,6 @@
 #ifndef GPPTR_HPP
 #define GPPTR_HPP
 
-#include <gdiplus.h>
-
 template <class T>
 class GpPtr
 {

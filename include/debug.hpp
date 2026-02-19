@@ -1,10 +1,6 @@
 #ifndef DEBUG_HPP
 #define DEBUG_HPP
 
-#include <fstream>
-#include <codecvt>
-#include <locale>
-
 namespace debug
 {
     wchar_t *getFullDebugFilePath();

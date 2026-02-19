@@ -1,8 +1,5 @@
+#include "pch.hpp"
 #include "danmaku/dmkbmpcache.hpp"
-
-#include <assert.h>
-
-using namespace Gdiplus::DllExports;
 
 namespace danmaku
 {

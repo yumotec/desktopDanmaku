@@ -1,10 +1,5 @@
+#include "pch.hpp"
 #include "functions/randnum.hpp"
-#include "functions/srwlk.hpp"
-
-#include <Windows.h>
-
-#include <algorithm>
-#include <limits>
 
 namespace random
 {

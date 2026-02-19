@@ -3,9 +3,6 @@
 
 #include "dmkbmpcache.hpp"
 
-#include <string>
-
-
 namespace danmaku
 {
     class DanmakuItem

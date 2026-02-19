@@ -1,8 +1,6 @@
 #ifndef FILES_H
 #define FILES_H
 
-#include <wchar.h>
-
 // 各种文件路径处理函数
 
 /**

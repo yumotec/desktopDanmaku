@@ -1,6 +1,8 @@
 # 设置代码页为UTF-8以支持中文路径和输出
 $(shell chcp 65001 >nul)
 
+MAKEFLAGS += -j --output-sync=target
+
 DEBUG ?= 1
 
 # 编译架构选择，默认64位
@@ -11,7 +13,7 @@ SHELL         := cmd
 .SUFFIXES:
 
 ifeq ($(ARCH),32)
-CXX      = i686-w64-mingw32-g++
+CXX      = g++ -m32
 WINDRES  = windres
 WINDRES_FLAG = -F pe-i386 -o
 else
@@ -40,6 +42,9 @@ BUILD_BASE:= build
 BUILD_DIR := $(BUILD_BASE)/$(ARCH)/$(CONFIG)
 OBJ_DIR   := $(BUILD_DIR)/obj
 BIN       := $(BUILD_DIR)/danmaku.exe
+PCH_SRC	  := $(INC_DIR)/pch.hpp
+PCH_OUT_DIR := $(BUILD_DIR)/pch
+PCH_OUT	  := $(PCH_OUT_DIR)/pch.gch
 
 # 源文件列表 
 CXX_SRCS := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/windows/*.cpp) $(wildcard $(SRC_DIR)/functions/*.cpp) $(wildcard $(SRC_DIR)/danmaku/*.cpp)
@@ -66,10 +71,17 @@ $(OBJ_DIR)/manifest.o: src/list.rc
 	@windres -o $@ $<
 
 # 编译对象文件 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR) $(PCH_OUT)
 	@echo 正在将源码文件 $< 编译到 $@
 	@if not exist "$(dir $@)" mkdir "$(dir $@)"
-	@$(CXX) $(CXXFLAGS) -g -I$(INC_DIR) -MMD -MP -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -g -I$(INC_DIR) -I$(PCH_OUT_DIR) -MMD -MP -c $< -o $@
+
+$(PCH_OUT_DIR):
+	@if not exist "$(PCH_OUT_DIR)" mkdir "$(PCH_OUT_DIR)"
+
+$(PCH_OUT): $(PCH_SRC) | $(PCH_OUT_DIR)
+	@echo 正在预编译头文件 $< ...
+	@$(CXX) $(CXXFLAGS) -I$(INC_DIR) -x c++-header $< -o $@
 
 # 自动依赖 
 -include $(CXX_OBJS:.o=.d)

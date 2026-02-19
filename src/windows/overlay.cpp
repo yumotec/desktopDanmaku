@@ -1,3 +1,4 @@
+#include "pch.hpp"
 #include "windows/overlay.hpp"
 #include "functions/randnum.hpp"
 
@@ -8,28 +9,25 @@ constexpr UINT TimerWorldTickInterval = 14; // 定时器间隔
 
 namespace danmaku
 {
+    static BOOL CALLBACK monitorEnumProc(
+        HMONITOR monitor, HDC, LPRECT, LPARAM param)
+    {
+        MONITORINFO mi;
+        mi.cbSize = sizeof(mi);
+        if (GetMonitorInfoW(monitor, &mi) && (mi.dwFlags & MONITORINFOF_PRIMARY))
+        {
+            *(HMONITOR *)param = monitor;
+            return FALSE;
+        }
+        return TRUE;
+    }
     // 获取主监视器的句柄
     static HMONITOR getPrimaryMonitor()
     {
         // 主监视器句柄
         HMONITOR monitor{};
         // 枚举所有监视器，直到找到主监视器
-        EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC, RECT *, LPARAM lParam) -> BOOL
-                            {
-            // 监视器信息变量
-            MONITORINFO mi;
-            mi.cbSize = sizeof(mi);
-            // 获取监视器信息
-            GetMonitorInfoW(hMonitor, &mi);
-            // 如果该监视器是主监视器，则将其句柄存储在lParam指向的变量中，并停止枚举
-            // 这里就是存入了monitor变量
-            if (mi.dwFlags & MONITORINFOF_PRIMARY)
-            {
-                *(HMONITOR*)lParam = hMonitor;
-                return FALSE;
-            }
-            else
-                return TRUE; }, (LPARAM)&monitor);
+        EnumDisplayMonitors(nullptr, nullptr, monitorEnumProc, (LPARAM)&monitor);
         return monitor;
     }
 

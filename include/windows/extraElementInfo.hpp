@@ -1,7 +1,5 @@
 #ifndef extraElementInfo_HPP
 #define extraElementInfo_HPP
-#include "windows.h"
-#include <functional>
 
 namespace danmaku
 {
@@ -24,4 +22,5 @@ namespace danmaku
         std::function<void()> leaveProc = nullptr; // 鼠标离开事件
     };
 }
+
 #endif // extraElementInfo_HPP

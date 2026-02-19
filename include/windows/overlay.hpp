@@ -12,17 +12,17 @@ namespace danmaku
     class OverlayWindow : public BaseWindow
     {
     private:
-        // 内存DC，用于双缓冲绘制
+        // 内存DC，分层窗口内容源
         HDC cdc_{};
         // 位图传输时用
         HDC cdcTemp_{};
-        // 内存位图，用于双缓冲绘制
+        // 内存位图
         HBITMAP bitmap_{};
         // 选择的旧位图对象，用于恢复DC状态
         HGDIOBJ oldObject_{};
         int width_{}, height_{}; // 客户区
 
-        DanmakuManager danmakuMgr_;
+        DanmakuManager danmakuMgr_{};
 
         BOOL layoutFullscreen();
 

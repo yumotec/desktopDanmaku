@@ -1,9 +1,5 @@
-#include <windows.h>
-
-#include <vector>
-
-#include "functions/gpptr.hpp"
-#include "functions/srwlk.hpp"
+#ifndef DANMAKU_DMKBMPCACHE_HPP
+#define DANMAKU_DMKBMPCACHE_HPP
 
 namespace danmaku
 {
@@ -83,3 +79,5 @@ namespace danmaku
         void free(Bitmap &&bmp);
     };
 }
+
+#endif // DANMAKU_DMKBMPCACHE_HPP

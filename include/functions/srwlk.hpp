@@ -1,8 +1,6 @@
 #ifndef SRWLK_HPP
 #define SRWLK_HPP
 
-#include <windows.h>
-
 class SrwLock
 {
 private:

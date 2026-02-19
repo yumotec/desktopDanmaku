@@ -1,8 +1,6 @@
 #ifndef DANMAKU_BASE_WINDOW_HPP
 #define DANMAKU_BASE_WINDOW_HPP
 
-#include <windows.h>
-
 namespace danmaku
 {
     /**
