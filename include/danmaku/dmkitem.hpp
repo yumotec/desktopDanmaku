@@ -1,73 +1,69 @@
 #ifndef DANMAKU_DMKITEM_HPP
 #define DANMAKU_DMKITEM_HPP
 
-#include <windows.h>
-#include <gdiplus.h>
+#include "dmkbmpcache.hpp"
 
 #include <string>
 
+
 namespace danmaku
 {
-    class danmakuItem
+    class DanmakuItem
     {
     private:
         Gdiplus::ARGB fillColor_{};
         Gdiplus::ARGB borderColor_{};
         std::wstring text_{};
-        Gdiplus::GpBitmap *bitmap_{};
-        int width_{};
-        int height_{};
-        int emSize_{};
-
+        DanmakuBitmapCache::Bitmap bitmap_{};
+        float width_{};
+        float height_{};
+        float emSize_{};
+        float x_{};
+        float speed_{}; // 像素/秒
+    public:
+        // 允许重复调用
         void rasterize();
 
-    public:
+        // 保留
         void invalidateCache();
 
-        Gdiplus::Status draw(Gdiplus::GpGraphics *g, int x, int y);
+        Gdiplus::Status draw(Gdiplus::GpGraphics *g, float x, float y);
 
-        danmakuItem() = default;
-        danmakuItem(const danmakuItem &) = delete;
-        danmakuItem &operator=(const danmakuItem &) = delete;
+        BOOL drawGdi(HDC dcDst, HDC cdc, float x, float y);
 
-        danmakuItem(danmakuItem && x) noexcept;
-        danmakuItem &operator=(danmakuItem && x) noexcept;
+        DanmakuItem() = default;
+        DanmakuItem(const DanmakuItem &) = delete;
+        DanmakuItem &operator=(const DanmakuItem &) = delete;
+        DanmakuItem(DanmakuItem &&) = default;
+        DanmakuItem &operator=(DanmakuItem &&) = default;
 
-        danmakuItem(
-            std::wstring_view text, int emSize,
-            Gdiplus::ARGB fillColor, Gdiplus::ARGB borderColor) :
-            fillColor_{fillColor}, borderColor_{borderColor},
-            text_{text},  emSize_{emSize}
+        DanmakuItem(
+            std::wstring_view text,
+            float emSize,
+            Gdiplus::ARGB fillColor,
+            Gdiplus::ARGB borderColor) : fillColor_{fillColor},
+                                         borderColor_{borderColor},
+                                         text_{text},
+                                         emSize_{emSize}
         {
         }
 
-        ~danmakuItem();
-
-        void setText(std::wstring_view text)
+        ~DanmakuItem()
         {
-            text_ = text;
             invalidateCache();
         }
-        void setFillColor(Gdiplus::ARGB color)
-        {
-            fillColor_ = color;
-            invalidateCache();
-        }
-        void setBorderColor(Gdiplus::ARGB color)
-        {
-            borderColor_ = color;
-            invalidateCache();
-        }
-        void setEmSize(int emSize)
-        {
-            emSize_ = emSize;
-            invalidateCache();
-        }
+
+        void setX(float x) { x_ = x; }
+        void setSpeed(float speed) { speed_ = speed; }
 
         const std::wstring &getText() const { return text_; }
         Gdiplus::ARGB getFillColor() const { return fillColor_; }
         Gdiplus::ARGB getBorderColor() const { return borderColor_; }
-        int getEmSize() const { return emSize_; }
+        float getEmSize() const { return emSize_; }
+        float getWidth() const { return width_; }
+        float getHeight() const { return height_; }
+        float getX() const { return x_; }
+        float getSpeed() const { return speed_; }
     };
 }
 

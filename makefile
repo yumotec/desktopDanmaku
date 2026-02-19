@@ -63,7 +63,7 @@ $(BIN): $(CXX_OBJS) $(OBJ_DIR)/manifest.o
 
 $(OBJ_DIR)/manifest.o: src/list.rc
 	@echo 正在编译资源文件 $< ...
-	@windres -o $@ $<
+	@$(WINDRES) $(WINDRES_FLAG) $@ $<
 
 # 编译对象文件 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
