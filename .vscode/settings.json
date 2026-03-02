@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "danmaku",
+        "DANMAKU_DMKBMPCACHE_HPP",
         "DMKITEM",
         "Gdip",
         "GWLP_USERDATA",
@@ -87,5 +88,12 @@
         "thread": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
-    }
+    },
+    "code-runner.runInTerminal": true,
+    "code-runner.cwd": "${workspaceFolder}",
+    "code-runner.fileDirectoryAsCwd": false,
+    "code-runner.executorMap": {
+        "cpp": "make && make run"
+    },
+    "code-run-respectFiles": false
 }
