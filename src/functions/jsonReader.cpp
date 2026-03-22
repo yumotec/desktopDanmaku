@@ -1,9 +1,7 @@
 #include "yyjson/yyjson.h"
 #include "pch.hpp"
-#include <locale>
 #include <cstdint>
 #include <stdexcept>
-#include <windows.h> // 用于 MultiByteToWideChar
 #include "danmaku/dmkitem.hpp"
 
 /*
@@ -28,14 +26,6 @@ json文件示例：
 
 namespace danmaku
 {
-    // wstring 转 UTF-8 string（注：codecvt_utf8在C++17被标记为弃用，理论上讲其实不应该这样写）
-    std::string wstring_to_utf8(const std::wstring &wstr)
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        return converter.to_bytes(wstr);
-    }
-
-    // 将 UTF-8 字符串转换为 std::wstring (UTF-16)
     static std::wstring Utf8ToWideString(const char *utf8)
     {
         if (!utf8)
@@ -44,24 +34,19 @@ namespace danmaku
         if (len <= 0)
             return {};
         std::wstring result(len - 1, L'\0');
-        MultiByteToWideChar(CP_UTF8, 0, utf8, -1, &result[0], len);
+        MultiByteToWideChar(CP_UTF8, 0, utf8, -1, result.data(), len);
         return result;
     }
 
-    // 将 std::wstring(UTF - 16) 转换为 UTF - 8 编码的 std::string
     static std::string WideStringToUtf8(const std::wstring &wstr)
     {
         if (wstr.empty())
             return {};
-
         int len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
         if (len <= 0)
-        {
             throw std::runtime_error("Failed to convert wide string to UTF-8");
-        }
-
-        std::string result(len - 1, '\0'); // 排除末尾的 null 终止符
-        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &result[0], len, nullptr, nullptr);
+        std::string result(len - 1, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, result.data(), len, nullptr, nullptr);
         return result;
     }
 

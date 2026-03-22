@@ -8,20 +8,21 @@ void buttonClickHandler();
 
 // 全局 GDI+ token
 ULONG_PTR g_gpToken{};
-// 全局 OverlayWindow 指针，用于在按钮点击时添加弹幕
+// 全局 OverlayWindow 指针
 danmaku::MainWindow *g_mainWindow = nullptr;
 danmaku::OverlayWindow *g_overlayWindow = nullptr;
-// 全局 optional 变量
+// 主窗口组件
 std::optional<danmaku::Element> g_elemLabelAppName;
 std::optional<danmaku::Element> g_elemLabelPrompt;
 std::optional<danmaku::Element> g_elemEditContent;
 std::optional<danmaku::Element> g_elemButton;
-// ↓ 后期将会禁用
+// ↓ 这些组件后期将会禁用
 std::optional<danmaku::Element> g_elemLabelColor1;
 std::optional<danmaku::Element> g_elemEditColor1;
 std::optional<danmaku::Element> g_elemLabelColor2;
 std::optional<danmaku::Element> g_elemEditColor2;
 
+// todo: 写一个提供日志输出、弹窗警告等功能的错误处理函数
 int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance,
                     [[maybe_unused]] PWSTR pCmdLine, [[maybe_unused]] int nCmdShow)
 {
@@ -38,19 +39,19 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
         return 1;
     }
 
+    // 初始化GDI
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     if (Gdiplus::GdiplusStartup(
             &g_gpToken,
             &gdiplusStartupInput,
             nullptr) != Gdiplus::Ok)
     {
+        // 错误处理
         MessageBoxW(nullptr, L"初始化 GDI+ 失败", L"错误", MB_OK);
         return 1;
     }
 
-    // 主窗口
-    MSG msg;
-
+    // 初始化弹幕位图缓存
     danmaku::DanmakuBitmapCache::startup();
 
     assert(!g_mainWindow);
@@ -62,6 +63,8 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
     // 初始化元素
     init_creatElement(*g_mainWindow);
 
+    // 消息循环
+    MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0))
     {
         if (!IsDialogMessageW(g_mainWindow->getHandle(), &msg))
@@ -71,6 +74,7 @@ int WINAPI wWinMain([[maybe_unused]] HINSTANCE hInstance, [[maybe_unused]] HINST
         }
     }
 
+    // 各种资源的销毁
     if (g_mainWindow)
         delete g_mainWindow; // GDI+关闭前析构
     g_mainWindow = nullptr;
@@ -181,6 +185,8 @@ void init_creatElement(danmaku::BaseWindow &mainWND)
         g_elemEditColor2.value());
 }
 
+// todo: 把这个函数挪到别的文件去，最好是functions文件夹（我现在有点懒）
+// 十六进制字符串到ARGB颜色值的转换函数
 Gdiplus::ARGB hexStringToArgb(const std::wstring &hexStr)
 {
     try
@@ -200,16 +206,20 @@ Gdiplus::ARGB hexStringToArgb(const std::wstring &hexStr)
     }
 }
 
+// 按钮按下事件处理函数
 void buttonClickHandler()
 {
     // 获取输入框内容
     wchar_t buffer[256]{};
     UINT length;
 
+    // 获取颜色输入框的内容并转换为ARGB颜色值
     length = GetDlgItemTextW(
         g_elemEditColor1->getParentHwnd(),
         g_elemEditColor1->getID(),
         buffer, _countof(buffer));
+    // 如果用户输入了颜色值，则转换；
+    // 否则使用默认颜色（调试模式下随机颜色，发布模式下白色不透明）
     Gdiplus::ARGB color1;
     if (length)
         color1 = hexStringToArgb({buffer, length});
@@ -223,6 +233,7 @@ void buttonClickHandler()
 #endif
     }
 
+    // 下面内容同上
     length = GetDlgItemTextW(
         g_elemEditColor2->getParentHwnd(),
         g_elemEditColor2->getID(),
@@ -240,17 +251,20 @@ void buttonClickHandler()
 #endif
     }
 
+    // 获取弹幕内容输入框的文本
     length = GetDlgItemTextW(
         g_elemEditContent->getParentHwnd(),
         g_elemEditContent->getID(),
         buffer, _countof(buffer));
     if (!length)
     {
+        // 如果输入框为空，弹出提示并返回
         MessageBoxW(g_mainWindow->getHandle(), L"请输入弹幕内容！", L"提示", MB_OK);
         return;
     }
     if (countVisibleCharacters({buffer, length}) > 80)
     {
+        // 如果输入的内容超过80个可见字符，弹出提示并返回
         MessageBoxW(g_mainWindow->getHandle(), L"弹幕内容不能超过80个字符！", L"提示", MB_OK);
         return;
     }

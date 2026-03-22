@@ -1,13 +1,22 @@
 #include "pch.hpp"
 #include "debug.hpp"
 #include "functions/files.hpp"
+#include <sstream>
 
 namespace debug
 {
-    /**
-     * @brief 获取完整的调试文件路径
-     * @return 调试文件路径
-     */
+    std::string WideToUtf8(const std::wstring& wstr)
+    {
+        if (wstr.empty())
+            return {};
+        int len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (len <= 0)
+            return {};
+        std::string result(len - 1, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, result.data(), len, nullptr, nullptr);
+        return result;
+    }
+
     wchar_t *getFullDebugFilePath()
     {
         static std::unique_ptr<wchar_t[]> fullPath = []()
