@@ -1,4 +1,4 @@
-; 脚本由 Inno Setup 脚本向导 生成！
+﻿; 脚本由 Inno Setup 脚本向导 生成！
 ; 有关创建 Inno Setup 脚本文件的详细资料请查阅帮助文档！
 
 #define MyAppName "桌面弹幕 - DesktopDanmaku"
