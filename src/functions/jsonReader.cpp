@@ -1,9 +1,11 @@
-#include "yyjson/yyjson.h"
 #include "pch.hpp"
+#include "yyjson/yyjson.h"
 #include <cstdint>
 #include <stdexcept>
 #include "danmaku/dmkitem.hpp"
 #include "debug.hpp"
+#include "functions/files.hpp"
+#include "functions/str.hpp"
 
 /*
 json文件示例：(ARGB)

@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include <thread>
 #include "windows/main.hpp"
 #include "functions/str.hpp"

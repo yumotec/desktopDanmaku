@@ -1,8 +1,6 @@
 #ifndef OTHERS_H
 #define OTHERS_H
 
-#include "pch.hpp"
-
 // 资源的安全释放
 template <typename T>
 void safeRelease(T **resourcePointer)

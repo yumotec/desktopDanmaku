@@ -23,11 +23,6 @@
 
 #include <assert.h>
 
-#include "functions/gpptr.hpp"
-#include "functions/srwlk.hpp"
-#include "functions/files.hpp"
-#include "functions/str.hpp"
-
 using namespace Gdiplus::DllExports;
 
 #endif // PCH_HPP

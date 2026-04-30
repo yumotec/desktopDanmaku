@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "danmaku/dmkitem.hpp"
 
 namespace danmaku

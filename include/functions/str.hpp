@@ -1,8 +1,6 @@
 #ifndef STR_HPP
 #define STR_HPP
 
-#include "pch.hpp"
-
 /**
  * 统计字符串的观感字数
  * 规则：

@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "functions/randnum.hpp"
+#include "functions/srwlk.hpp"
 
 namespace random
 {

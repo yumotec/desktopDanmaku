@@ -1,7 +1,8 @@
 #ifndef DANMAKU_DMKBMPCACHE_HPP
 #define DANMAKU_DMKBMPCACHE_HPP
 
-#include "pch.hpp"
+#include "functions/gpptr.hpp"
+#include "functions/srwlk.hpp"
 
 namespace danmaku
 {

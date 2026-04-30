@@ -1,8 +1,6 @@
 #ifndef extraElementInfo_HPP
 #define extraElementInfo_HPP
 
-#include "pch.hpp"
-
 namespace danmaku
 {
     struct LabelExtraInfo
